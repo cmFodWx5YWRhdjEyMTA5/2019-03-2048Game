@@ -9,16 +9,22 @@
         android:id="@+id/mainWebView"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/adView"
+        android:layout_above="@+id/native_banner_ad_container"
         android:layout_alignParentTop="true" />
 
-    <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+    <com.facebook.ads.NativeAdLayout
+        android:id="@+id/native_banner_ad_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" />
+
+    <!--<com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
         android:id="@+id/adView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         ads:adSize="LARGE_BANNER"
-        ads:adUnitId="ca-app-pub-4759255989930149/5581754115"></com.google.android.gms.ads.AdView>
+        ads:adUnitId="ca-app-pub-4759255989930149/5581754115"></com.google.android.gms.ads.AdView>-->
 
 </RelativeLayout>

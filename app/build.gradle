@@ -27,8 +27,8 @@ android {
         ]
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.2"
     }
 
     lintOptions {
@@ -45,10 +45,7 @@ android {
 
 dependencies {
     implementation 'de.cketti.library.changelog:ckchangelog:1.2.2'
-    implementation 'com.google.android.gms:play-services-ads:17.1.1'
+    //implementation 'com.google.android.gms:play-services-ads:17.1.1'
     implementation 'com.onesignal:OneSignal:[3.9.1, 3.99.99]'
-    // TODO: choose correct library and implement it (https://github.com/cketti/ckChangeLog/tree/version_2)
-    //implementation 'de.cketti.library.changelog:ckchangelog-legacy-dialog:2.0.0-SNAPSHOT'
-    // OR
-    //implementation 'de.cketti.library.changelog:ckchangelog-core:2.0.0-SNAPSHOT'
+    implementation 'com.facebook.android:audience-network-sdk:5.+'
 }

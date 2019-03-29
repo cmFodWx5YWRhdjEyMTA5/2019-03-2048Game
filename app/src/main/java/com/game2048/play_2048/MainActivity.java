@@ -12,7 +12,9 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
@@ -22,15 +24,23 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
-import com.google.android.gms.ads.MobileAds;
+import com.facebook.ads.Ad;
+import com.facebook.ads.AdError;
+import com.facebook.ads.AdIconView;
+import com.facebook.ads.AdOptionsView;
+import com.facebook.ads.NativeAdLayout;
+import com.facebook.ads.NativeAdListener;
+import com.facebook.ads.NativeBannerAd;
 import com.onesignal.OneSignal;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends Activity {
@@ -45,12 +55,9 @@ public class MainActivity extends Activity {
     private static final long mTouchThreshold = 2000;
     private Toast pressBackToast;
 
-    private final String ADMOB_APP_ID = "ca-app-pub-4759255989930149~5456796888";
-    private final String ADMOB_BANNER_AD_ID = "ca-app-pub-4759255989930149/5581754115";
-    private final String ADMOB_INTERSTITIAL_AD_ID = "ca-app-pub-4759255989930149/9587134651";
-
-    private AdView mAdView;
-    private InterstitialAd mInterstitialAd;
+    private NativeBannerAd nativeBannerAd;
+    private LinearLayout adView;
+    private NativeAdLayout nativeAdLayout;
 
     @SuppressLint({"SetJavaScriptEnabled", "NewApi", "ShowToast", "ClickableViewAccessibility"})
     @Override
@@ -140,31 +147,11 @@ public class MainActivity extends Activity {
                 .unsubscribeWhenNotificationsAreDisabled(true)
                 .init();
 
-
-        MobileAds.initialize(this, ADMOB_APP_ID);
-        AdView adView = new AdView(this);
-        adView.setAdSize(AdSize.LARGE_BANNER);
-        adView.setAdUnitId(ADMOB_BANNER_AD_ID);
-
-        mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().addTestDevice("25E662D1EDF4290CE580D9AA9FA945B9").build();
-        mAdView.loadAd(adRequest);
-
-        mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId(ADMOB_INTERSTITIAL_AD_ID);
-        mInterstitialAd.loadAd(adRequest);
-
         mWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
                 if (consoleMessage.message().equalsIgnoreCase("GAME OVER")) {
                     Toast.makeText(MainActivity.this, "Game Over!!", Toast.LENGTH_LONG).show();
-                }
-
-                if (mInterstitialAd.isLoaded()) {
-                    mInterstitialAd.show();
-                } else {
-                    mInterstitialAd.loadAd(adRequest);
                 }
 
                 Handler h = new Handler();
@@ -174,6 +161,84 @@ public class MainActivity extends Activity {
                 return true;
             }
         });
+
+        loadFacebookBannerAd();
+    }
+
+    private void loadFacebookBannerAd() {
+        nativeBannerAd = new NativeBannerAd(this, getResources().getString(R.string.fb_native_banner_ads_app_id));
+        nativeBannerAd.setAdListener(new NativeAdListener() {
+            @Override
+            public void onMediaDownloaded(Ad ad) {
+                // Native ad finished downloading all assets
+            }
+
+            @Override
+            public void onError(Ad ad, AdError adError) {
+                // Native ad failed to load
+            }
+
+            @Override
+            public void onAdLoaded(Ad ad) {
+                // Native ad is loaded and ready to be displayed
+                if (nativeBannerAd == null || nativeBannerAd != ad) {
+                    return;
+                }
+                // Inflate Native Banner Ad into Container
+                inflateAd(nativeBannerAd);
+            }
+
+            @Override
+            public void onAdClicked(Ad ad) {
+                // Native ad clicked
+            }
+
+            @Override
+            public void onLoggingImpression(Ad ad) {
+                // Native ad impression
+            }
+        });
+        // load the ad
+        nativeBannerAd.loadAd();
+    }
+
+    private void inflateAd(NativeBannerAd nativeBannerAd) {
+        // Unregister last ad
+        nativeBannerAd.unregisterView();
+
+        // Add the Ad view into the ad container.
+        nativeAdLayout = findViewById(R.id.native_banner_ad_container);
+        LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
+        // Inflate the Ad view.  The layout referenced is the one you created in the last step.
+        adView = (LinearLayout) inflater.inflate(R.layout.native_banner_custom_layout, nativeAdLayout, false);
+        nativeAdLayout.addView(adView);
+
+        // Add the AdChoices icon
+        RelativeLayout adChoicesContainer = adView.findViewById(R.id.ad_choices_container);
+        AdOptionsView adOptionsView = new AdOptionsView(MainActivity.this, nativeBannerAd, nativeAdLayout);
+        adChoicesContainer.removeAllViews();
+        adChoicesContainer.addView(adOptionsView, 0);
+
+        // Create native UI using the ad metadata.
+        TextView nativeAdTitle = adView.findViewById(R.id.native_ad_title);
+        TextView nativeAdSocialContext = adView.findViewById(R.id.native_ad_social_context);
+        TextView sponsoredLabel = adView.findViewById(R.id.native_ad_sponsored_label);
+        AdIconView nativeAdIconView = adView.findViewById(R.id.native_icon_view);
+        Button nativeAdCallToAction = adView.findViewById(R.id.native_ad_call_to_action);
+
+        // Set the Text.
+        nativeAdCallToAction.setText(nativeBannerAd.getAdCallToAction());
+        nativeAdCallToAction.setVisibility(
+                nativeBannerAd.hasCallToAction() ? View.VISIBLE : View.INVISIBLE);
+        nativeAdTitle.setText(nativeBannerAd.getAdvertiserName());
+        nativeAdSocialContext.setText(nativeBannerAd.getAdSocialContext());
+        sponsoredLabel.setText(nativeBannerAd.getSponsoredTranslation());
+
+        // Register the Title and CTA button to listen for clicks.
+        List<View> clickableViews = new ArrayList<>();
+        clickableViews.add(nativeAdTitle);
+        clickableViews.add(nativeAdCallToAction);
+        nativeBannerAd.registerViewForInteraction(adView, nativeAdIconView, clickableViews);
     }
 
     @JavascriptInterface
@@ -239,11 +304,6 @@ public class MainActivity extends Activity {
         } else {
             pressBackToast.cancel();
             super.onBackPressed();
-            if (mInterstitialAd.isLoaded()) {
-                mInterstitialAd.show();
-            } else {
-                Log.d("TAG", "The interstitial wasn't loaded yet.");
-            }
         }
     }
 }

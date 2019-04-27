@@ -2,9 +2,13 @@ package com.game2048.play_2048;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,6 +17,9 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -49,11 +56,9 @@ public class MainActivity extends Activity {
 
     private WebView mWebView;
     private long mLastBackPress;
-    private static final long mBackPressThreshold = 3500;
     private static final String IS_FULLSCREEN_PREF = "is_fullscreen_pref";
     private long mLastTouch;
     private static final long mTouchThreshold = 2000;
-    private Toast pressBackToast;
 
     private NativeBannerAd nativeBannerAd;
     private LinearLayout adView;
@@ -74,7 +79,7 @@ public class MainActivity extends Activity {
         }
 
         // Apply previous setting about showing status bar or not
-        applyFullScreen(isFullScreen());
+        //applyFullScreen(isFullScreen());
 
         // Check if screen rotation is locked in settings
         boolean isOrientationEnabled = false;
@@ -137,7 +142,7 @@ public class MainActivity extends Activity {
             return false;
         });
 
-        pressBackToast = Toast.makeText(getApplicationContext(), R.string.press_back_again_to_exit,
+        Toast pressBackToast = Toast.makeText(getApplicationContext(), R.string.press_back_again_to_exit,
                 Toast.LENGTH_SHORT);
 
 
@@ -162,7 +167,11 @@ public class MainActivity extends Activity {
             }
         });
 
-        loadFacebookBannerAd();
+        if (AppUtility.verifyInstallerId(this)) {
+            loadFacebookBannerAd();
+        } else {
+            Toast.makeText(this, "For latest updates please download the app from Play Store", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void loadFacebookBannerAd() {
@@ -297,13 +306,6 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        long currentTime = System.currentTimeMillis();
-        if (Math.abs(currentTime - mLastBackPress) > mBackPressThreshold) {
-            pressBackToast.show();
-            mLastBackPress = currentTime;
-        } else {
-            pressBackToast.cancel();
-            super.onBackPressed();
-        }
+        AppUtility.showAlertDialog(this);
     }
 }

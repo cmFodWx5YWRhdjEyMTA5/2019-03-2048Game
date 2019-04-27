@@ -19,7 +19,7 @@ android {
     buildToolsVersion '28.0.3'
 
     defaultConfig {
-        applicationId "com.game2048.play_2048"
+        applicationId "com.game2048.original2048"
         manifestPlaceholders = [
                 onesignal_app_id: '62cab0f5-9418-447c-94df-6dca7ead24cf',
                 // Project number pulled from dashboard, local value is ignored.

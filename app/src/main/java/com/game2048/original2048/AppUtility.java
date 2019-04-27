@@ -1,9 +1,8 @@
-package com.game2048.play_2048;
+package com.game2048.original2048;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 

@@ -21,14 +21,14 @@ android {
     defaultConfig {
         applicationId "com.game2048.original2048"
         manifestPlaceholders = [
-                onesignal_app_id: '62cab0f5-9418-447c-94df-6dca7ead24cf',
+                onesignal_app_id: 'dd603b66-2374-49ca-9dca-0da1b37d5662',
                 // Project number pulled from dashboard, local value is ignored.
                 onesignal_google_project_number: 'REMOTE'
         ]
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 3
-        versionName "1.2"
+        versionCode 4
+        versionName "1.3"
     }
 
     lintOptions {

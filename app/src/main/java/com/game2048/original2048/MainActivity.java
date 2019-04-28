@@ -18,6 +18,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
@@ -241,6 +243,20 @@ public class MainActivity extends Activity {
         clickableViews.add(nativeAdTitle);
         clickableViews.add(nativeAdCallToAction);
         nativeBannerAd.registerViewForInteraction(adView, nativeAdIconView, clickableViews);
+
+        animateNativeBanner();
+    }
+
+    long delay = 0;
+    private void animateNativeBanner() {
+        Handler handler = new Handler();
+        handler.postDelayed(() -> {
+            Animation animation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.my_anim);
+            nativeAdLayout.startAnimation(animation);
+            delay = 60000;
+            animateNativeBanner();
+        }, delay);
+
     }
 
     @JavascriptInterface

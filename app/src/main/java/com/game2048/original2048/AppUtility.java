@@ -11,12 +11,13 @@ import java.util.Arrays;
 import java.util.List;
 
 public class AppUtility {
-    public static void showAlertDialog(Activity activity) {
+    public static void showAlertDialog(Activity activity, IAppExit iAppExitListener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         // builder.setCancelable(false);
         builder.setTitle("Rate us if you like 2048");
         builder.setMessage("Do you want to Exit?");
         builder.setPositiveButton("Yes", (dialog, which) -> {
+            iAppExitListener.onAppExit();
             activity.finish();
         });
         builder.setNegativeButton("No", (dialog, which) -> dialog.cancel());
@@ -40,5 +41,9 @@ public class AppUtility {
 
         // true if your app has been downloaded from Play Store
         return installer != null && validInstallers.contains(installer);
+    }
+
+    interface IAppExit {
+        void onAppExit();
     }
 }

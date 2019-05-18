@@ -32,6 +32,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.applovin.adview.AppLovinIncentivizedInterstitial;
+import com.applovin.sdk.AppLovinAd;
+import com.applovin.sdk.AppLovinAdClickListener;
+import com.applovin.sdk.AppLovinAdDisplayListener;
+import com.applovin.sdk.AppLovinAdLoadListener;
+import com.applovin.sdk.AppLovinAdRewardListener;
+import com.applovin.sdk.AppLovinAdVideoPlaybackListener;
+import com.applovin.sdk.AppLovinErrorCodes;
+import com.applovin.sdk.AppLovinSdk;
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
 import com.facebook.ads.AdIconView;
@@ -44,8 +53,9 @@ import com.onesignal.OneSignal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements AppUtility.IAppExit{
 
     private static final String MAIN_ACTIVITY_TAG = "2048_MainActivity";
 
@@ -59,11 +69,15 @@ public class MainActivity extends Activity {
     private LinearLayout adView;
     private NativeAdLayout nativeAdLayout;
 
+    private AppLovinIncentivizedInterstitial incentivizedInterstitial = null;
+
     @SuppressLint({"SetJavaScriptEnabled", "NewApi", "ShowToast", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        AppLovinSdk.initializeSdk(this);
+        loadApplovinAd();
         // Don't show an action bar or title
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
@@ -152,6 +166,7 @@ public class MainActivity extends Activity {
             public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
                 if (consoleMessage.message().equalsIgnoreCase("GAME OVER")) {
                     Toast.makeText(MainActivity.this, "Game Over!!", Toast.LENGTH_LONG).show();
+                    showApplovinAd();
                 }
 
                 Handler h = new Handler();
@@ -167,6 +182,31 @@ public class MainActivity extends Activity {
         } else {
             Toast.makeText(this, "For latest updates please download the app from Play Store", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void showApplovinAd() {
+        if (incentivizedInterstitial != null) {
+            incentivizedInterstitial.show(this);
+        }
+        loadApplovinAd();
+    }
+
+
+    private void loadApplovinAd() {
+        if (incentivizedInterstitial == null) {
+            incentivizedInterstitial = AppLovinIncentivizedInterstitial.create(getApplicationContext());
+        }
+        incentivizedInterstitial.preload(new AppLovinAdLoadListener() {
+            @Override
+            public void adReceived(AppLovinAd appLovinAd) {
+                Log.e("ANKUSH", "AD LOADED");
+            }
+
+            @Override
+            public void failedToReceiveAd(int errorCode) {
+                Log.e("ANKUSH", "AD LOAD FAILED");
+            }
+        });
     }
 
     private void loadFacebookBannerAd() {
@@ -248,6 +288,7 @@ public class MainActivity extends Activity {
     }
 
     long delay = 0;
+
     private void animateNativeBanner() {
         Handler handler = new Handler();
         handler.postDelayed(() -> {
@@ -315,6 +356,11 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        AppUtility.showAlertDialog(this);
+        AppUtility.showAlertDialog(this, this);
+    }
+
+    @Override
+    public void onAppExit() {
+        showApplovinAd();
     }
 }

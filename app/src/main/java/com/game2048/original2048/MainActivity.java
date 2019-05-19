@@ -193,9 +193,7 @@ public class MainActivity extends Activity implements AppUtility.IAppExit{
 
 
     private void loadApplovinAd() {
-        if (incentivizedInterstitial == null) {
-            incentivizedInterstitial = AppLovinIncentivizedInterstitial.create(getApplicationContext());
-        }
+        incentivizedInterstitial = AppLovinIncentivizedInterstitial.create(getApplicationContext());
         incentivizedInterstitial.preload(new AppLovinAdLoadListener() {
             @Override
             public void adReceived(AppLovinAd appLovinAd) {
